@@ -2,10 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const logger = require('./config/logger');
+const logger = require('logger');
 require('dotenv').config();
 
-const { connectMySQL, mysqlQuery, mysqlTransaction } = require('./config/database-mysql');
+const { connectMySQL, mysqlQuery, mysqlTransaction } = require('database-mysql');
 
 const app = express();
 

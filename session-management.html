@@ -1,0 +1,160 @@
+<!-- Add this script to your index.html file right after the opening <script> tag -->
+
+<script>
+// ==================== SESSION MANAGEMENT ====================
+
+// Check if user is logged in
+function checkAuth() {
+    const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+    
+    if (!user) {
+        // Not logged in, redirect to login page
+        window.location.href = 'login.html';
+        return null;
+    }
+    
+    try {
+        return JSON.parse(user);
+    } catch (error) {
+        console.error('Error parsing user data:', error);
+        logout();
+        return null;
+    }
+}
+
+// Logout function
+function logout() {
+    // Clear all stored data
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    
+    // Redirect to login page
+    window.location.href = 'login.html';
+}
+
+// Get auth token for API calls
+function getAuthToken() {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+}
+
+// Add authorization header to API calls
+function makeAuthenticatedRequest(url, options = {}) {
+    const token = getAuthToken();
+    
+    if (token) {
+        options.headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${token}`
+        };
+    }
+    
+    return fetch(url, options);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const currentUser = checkAuth();
+    
+    if (currentUser) {
+        // Display user info in header
+        displayUserInfo(currentUser);
+        
+        // Add logout button functionality
+        setupLogoutButton();
+    }
+});
+
+// Display user information in the header
+function displayUserInfo(user) {
+    // Find or create user info section in header
+    const header = document.querySelector('header');
+    
+    if (!header) return;
+    
+    // Check if user info already exists
+    let userInfo = document.getElementById('userInfo');
+    
+    if (!userInfo) {
+        userInfo = document.createElement('div');
+        userInfo.id = 'userInfo';
+        userInfo.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        `;
+        header.appendChild(userInfo);
+    }
+    
+    userInfo.innerHTML = `
+        <div style="text-align: right;">
+            <div style="font-weight: 600; color: #1f2937;">${user.username}</div>
+            <div style="font-size: 0.85em; color: #6b7280; text-transform: capitalize;">${user.role}</div>
+        </div>
+        <button onclick="logout()" style="
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        " onmouseover="this.style.background='#dc2626'" 
+           onmouseout="this.style.background='#ef4444'">
+            Logout
+        </button>
+    `;
+}
+
+// Setup logout button if it exists
+function setupLogoutButton() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+}
+
+// Session timeout (optional - 30 minutes of inactivity)
+let inactivityTimer;
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+        alert('Your session has expired due to inactivity. Please login again.');
+        logout();
+    }, INACTIVITY_TIMEOUT);
+}
+
+// Reset timer on user activity
+['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, true);
+});
+
+// Initialize inactivity timer
+resetInactivityTimer();
+
+</script>
+
+<style>
+/* Add these styles to your index.html */
+
+/* Update header to accommodate user info */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* User info styles are inline in the script above */
+</style>
+
+<!-- ALTERNATIVE: Add this HTML to your header section in index.html -->
+<!--
+<div id="userInfo" style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
+    <!-- User info will be injected here by JavaScript -->
+</div>
+-->

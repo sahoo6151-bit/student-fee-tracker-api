@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Fee Tracking System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+
+        .user-details {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 0.95em;
+        }
+
+        .user-role {
+            font-size: 0.8em;
+            color: #6b7280;
+            text-transform: capitalize;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .api-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .api-status.connected {
+            background: #10b981;
+            color: white;
+        }
+
+        .api-status.disconnected {
+            background: #ef4444;
+            color: white;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .stat-card.primary .value {
+            color: #667eea;
+        }
+
+        .stat-card.success .value {
+            color: #10b981;
+        }
+
+        .stat-card.warning .value {
+            color: #f59e0b;
+        }
+
+        .stat-card.danger .value {
+            color: #ef4444;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab:hover {
+            background: #e5e7eb;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .badge.paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.pending {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+		
+		.badge.active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .form-actions button {
+            flex: 1;
+        }
+
+        .currency {
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+		
+        .fee-breakdown {
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .fee-breakdown h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+		
+        .total-fee {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+			margin-bottom: 20px;
+        }
+
+        .total-fee .label {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .total-fee .amount {
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+		
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>🎓 Student Fee Tracking System</h1>
+                <p>API-Driven Fee Management</p>
+                <span class="api-status" id="apiStatus">Connecting...</span>
+            </div>
+            <div class="header-right" id="userInfoSection" style="display: none;">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName">User</div>
+                        <div class="user-role" id="userRole">Role</div>
+                    </div>
+                    <div style="font-size: 1.5em;">👤</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    🚪 Logout
+                </button>
+            </div>
+        </header>
+
+        <div class="dashboard" id="dashboard">
+            <div class="stat-card primary">
+                <h3>Total Students</h3>
+                <div class="value" id="totalStudents">0</div>
+            </div>
+            <div class="stat-card success">
+                <h3>Fee Collected</h3>
+                <div class="value currency" id="feeCollected">₹0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>Pending Amount</h3>
+                <div class="value currency" id="feePending">₹0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Collection Rate</h3>
+                <div class="value" id="collectionRate">0%</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('students')">Students</button>
+                <button class="tab" onclick="switchTab('payments')">Payments</button>
+                <button class="tab" onclick="switchTab('feeStructures')">Fee Structures</button>
+            </div>
+
+            <div id="studentsTab" class="tab-content active">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <input type="text" id="searchStudent" placeholder="Search by name or class..." onkeyup="filterStudents()">
+                    </div>
+                    <select id="filterStatus" onchange="filterStudents()">
+                        <option value="">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="partial">Partial</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="openAddStudentModal()">+ Add Student</button>
+                </div>
+
+                <table id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Total Fee</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="paymentsTab" class="tab-content">
+                <div class="toolbar">
+                    <select id="filterPaymentStudent" onchange="loadPayments()">
+                        <option value="">All Students</option>
+                    </select>
+                    <button class="btn btn-success" onclick="openAddPaymentModal()">+ Record Payment</button>
+                </div>
+
+                <table id="paymentsTable">
+                    <thead>
+                        <tr>
+                            <th>Receipt #</th>
+                            <th>Student</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Method</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTableBody">
+                    </tbody>
+                </table>
+            </div>
+			
+			<div id="feeStructuresTab" class="tab-content">
+				<div class="toolbar">
+                    <select id="filterAcademicYear" onchange="loadFeeStructures()">
+                        <option value="">All Academic Years</option>
+                        <option value="2025-2026" selected>2025-2026</option>
+                        <option value="2024-2025">2024-2025</option>
+                        <option value="2026-2027">2026-2027</option>
+                    </select>
+                    <select id="filterStatus" onchange="loadFeeStructures()">
+                        <option value="">All Status</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    + Add Fee Structure
+                </button>
+            </div>
+
+            <div class="info-card">
+                <p>💡 Fee structures define the standard fees for each class. Students can have individual adjustments through discounts.</p>
+            </div>
+
+            <table id="feeStructuresTable">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Academic Year</th>
+                        <th>Tuition Fee</th>
+                        <th>Other Fees</th>
+                        <th>Total Fee</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="feeStructuresTableBody">
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <p>Loading fee structures...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+			</div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Student</h2>
+            </div>
+            <form id="addStudentForm" onsubmit="addStudent(event)">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Class *</label>
+                    <input type="text" name="class" required placeholder="e.g., 10-A">
+                </div>
+                <div class="form-group">
+                    <label>Total Fee (₹) *</label>
+                    <input type="number" name="totalFee" required min="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('addStudentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Payment Modal -->
+    <div id="addPaymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Record Payment</h2>
+            </div>
+            <form id="addPaymentForm" onsubmit="addPayment(event)">
+                <div class="form-group">
+                    <label>Student *</label>
+                    <select name="studentId" id="paymentStudentSelect" required onchange="updateBalanceDisplay()">
+                        <option value="">Select student</option>
+                    </select>
+                </div>
+                <div class="form-group" id="balanceDisplay" style="display:none;">
+                    <label>Current Balance</label>
+                    <div style="font-size: 1.2em; font-weight: bold; color: #667eea;" id="balanceAmount"></div>
+                </div>
+                <div class="form-group">
+                    <label>Amount (₹) *</label>
+                    <input type="number" name="amount" required min="1">
+                </div>
+                <div class="form-group">
+                    <label>Date *</label>
+                    <input type="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method *</label>
+                    <select name="method" required>
+                        <option value="cash">Cash</option>
+                        <option value="online">Online Transfer</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="card">Card</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('addPaymentModal')">Cancel</button>
+                    <button type="submit" class="btn btn-success">Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+	
+    <!-- Add/Edit Fee Structure Modal -->
+    <div id="feeStructureModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Fee Structure</h2>
+                <p>Define fee components for a class</p>
+            </div>
+
+            <form id="feeStructureForm" onsubmit="saveFeeStructure(event)">
+                <input type="hidden" id="feeStructureId" name="id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="class">Class *</label>
+                        <select id="class" name="class" required>
+                            <option value="">Select Class</option>
+                            <option value="1">Class 1</option>
+                            <option value="2">Class 2</option>
+                            <option value="3">Class 3</option>
+                            <option value="4">Class 4</option>
+                            <option value="5">Class 5</option>
+                            <option value="6">Class 6</option>
+                            <option value="7">Class 7</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="academicYear">Academic Year *</label>
+                        <select id="academicYear" name="academicYear" required>
+                            <option value="2024-2025">2024-2025</option>
+                            <option value="2025-2026" selected>2025-2026</option>
+                            <option value="2026-2027">2026-2027</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="fee-breakdown">
+                    <h3>📋 Fee Components</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tuitionFee">Tuition Fee (₹) *</label>
+                            <input type="number" id="tuitionFee" name="tuitionFee" min="0" step="0.01" required onchange="calculateTotal()">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admissionFee">Admission Fee (₹)</label>
+                            <input type="number" id="admissionFee" name="admissionFee" min="0" step="0.01" value="0" onchange="calculateTotal()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="examFee">Exam Fee (₹)</label>
+                            <input type="number" id="examFee" name="examFee" min="0" step="0.01" value="0" onchange="calculateTotal()">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="libraryFee">Library Fee (₹)</label>
+                            <input type="number" id="libraryFee" name="libraryFee" min="0" step="0.01" value="0" onchange="calculateTotal()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sportsFee">Sports Fee (₹)</label>
+                            <input type="number" id="sportsFee" name="sportsFee" min="0" step="0.01" value="0" onchange="calculateTotal()">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="labFee">Lab Fee (₹)</label>
+                            <input type="number" id="labFee" name="labFee" min="0" step="0.01" value="0" onchange="calculateTotal()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="transportFee">Transport Fee (₹)</label>
+                            <input type="number" id="transportFee" name="transportFee" min="0" step="0.01" value="0" onchange="calculateTotal()">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="otherFees">Other Fees (₹)</label>
+                            <input type="number" id="otherFees" name="otherFees" min="0" step="0.01" value="0" onchange="calculateTotal()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="total-fee">
+                    <span class="label">Total Annual Fee:</span>
+                    <span class="amount">₹<span id="totalFeeDisplay">0</span></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="isActive">Status</label>
+                        <select id="isActive" name="isActive">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('feeStructureModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Fee Structure</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let studentsData = [];
+        let paymentsData = [];
+		let feeStructuresData = [];
+
+        // ==================== AUTHENTICATION & SESSION MANAGEMENT ====================
+
+        // Check if user is logged in
+        function checkAuth() {
+            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+            
+            if (!user) {
+                // Not logged in, redirect to login page
+                window.location.href = 'login.html';
+                return null;
+            }
+            
+            try {
+                return JSON.parse(user);
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                logout();
+                return null;
+            }
+        }
+
+        // Logout function
+        function logout() {
+            // Show confirmation
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear all stored data
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('token');
+                
+                // Redirect to login page
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Display user information in header
+        function displayUserInfo(user) {
+            const userInfoSection = document.getElementById('userInfoSection');
+            const userName = document.getElementById('userName');
+            const userRole = document.getElementById('userRole');
+            
+            if (userInfoSection && userName && userRole) {
+                userName.textContent = user.username || 'User';
+                userRole.textContent = user.role || 'Guest';
+                userInfoSection.style.display = 'flex';
+            }
+        }
+
+        // Session timeout (30 minutes of inactivity)
+        let inactivityTimer;
+        const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                alert('Your session has expired due to inactivity. Please login again.');
+                logout();
+            }, INACTIVITY_TIMEOUT);
+        }
+
+        // Reset timer on user activity
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication first
+            const currentUser = checkAuth();
+            
+            if (currentUser) {
+                // Display user info
+                displayUserInfo(currentUser);
+                
+                // Start inactivity timer
+                resetInactivityTimer();
+                
+                // Load data
+                loadDashboard();
+                loadStudents();
+                loadPayments();
+				loadFeeStructures();
+                setInterval(checkAPIStatus, 5000);
+            }
+        });
+
+        // Check API Status
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch(`${API_URL}/statistics`);
+                if (response.ok) {
+                    document.getElementById('apiStatus').textContent = 'API Connected';
+                    document.getElementById('apiStatus').className = 'api-status connected';
+                }
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = 'API Disconnected';
+                document.getElementById('apiStatus').className = 'api-status disconnected';
+            }
+        }
+
+        // Load Dashboard Statistics
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_URL}/statistics`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.data;
+                    document.getElementById('totalStudents').textContent = data.totalStudents;
+                    document.getElementById('feeCollected').textContent = `₹${data.totalFeeCollected.toLocaleString()}`;
+                    document.getElementById('feePending').textContent = `₹${data.totalPending.toLocaleString()}`;
+                    document.getElementById('collectionRate').textContent = `${data.collectionRate}%`;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load Students
+        async function loadStudents() {
+            try {
+                const response = await fetch(`${API_URL}/students`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    studentsData = result.data;
+                    displayStudents(studentsData);
+                    updatePaymentStudentDropdowns();
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+
+        // Display Students
+        function displayStudents(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            
+            if (students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <p>No students found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.class}</td>
+                    <td class="currency">₹${student.total_fee.toLocaleString()}</td>
+                    <td class="currency">₹${student.paid_amount.toLocaleString()}</td>
+                    <td class="currency">₹${student.balance.toLocaleString()}</td>
+                    <td><span class="badge ${student.status}">${student.status.toUpperCase()}</span></td>
+                    <td>
+                        <button class="btn btn-success btn-small" onclick="openPaymentForStudent(${student.id})" 
+                            ${student.balance === 0 ? 'disabled' : ''}>Pay</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteStudent(${student.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Filter Students
+        function filterStudents() {
+            const searchTerm = document.getElementById('searchStudent').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            let filtered = studentsData.filter(student => {
+                const matchesSearch = student.name.toLowerCase().includes(searchTerm) || 
+                                    student.class.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || student.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            displayStudents(filtered);
+        }
+
+        // Add Student
+        async function addStudent(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                class: formData.get('class'),
+                totalFee: parseFloat(formData.get('totalFee'))
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/students`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeModal('addStudentModal');
+                    event.target.reset();
+                    loadStudents();
+                    loadDashboard();
+                    alert('Student added successfully!');
+                }
+            } catch (error) {
+                console.error('Error adding student:', error);
+                alert('Failed to add student');
+            }
+        }
+
+        // Delete Student
+        async function deleteStudent(id) {
+            if (!confirm('Are you sure you want to delete this student?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/students/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadStudents();
+                    loadDashboard();
+                    alert('Student deleted successfully!');
+                }
+            } catch (error) {
+                console.error('Error deleting student:', error);
+                alert('Failed to delete student');
+            }
+        }
+
+        // Load Payments
+        async function loadPayments() {
+            try {
+                const studentId = document.getElementById('filterPaymentStudent').value;
+                const url = studentId ? `${API_URL}/payments?studentId=${studentId}` : `${API_URL}/payments`;
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success) {
+                    paymentsData = result.data;
+                    displayPayments(paymentsData);
+                }
+            } catch (error) {
+                console.error('Error loading payments:', error);
+            }
+        }
+
+        // Display Payments
+        function displayPayments(payments) {
+            const tbody = document.getElementById('paymentsTableBody');
+            
+            if (payments.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <p>No payments recorded</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = payments.map(payment => {
+                const studentName = payment.student_name || payment.studentName || 'Unknown';
+                return `
+                    <tr>
+                        <td>${payment.receipt_number}</td>
+                        <td>${studentName}</td>
+                        <td class="currency">₹${payment.amount.toLocaleString()}</td>
+                        <td>${new Date(payment.payment_date).toLocaleDateString()}</td>
+                        <td>${payment.payment_method}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Add Payment
+        async function addPayment(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {
+                studentId: parseInt(formData.get('studentId')),
+                amount: parseFloat(formData.get('amount')),
+                date: formData.get('date'),
+                method: formData.get('method')
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/payments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeModal('addPaymentModal');
+                    event.target.reset();
+                    loadStudents();
+                    loadPayments();
+                    loadDashboard();
+                    alert(`Payment recorded! Receipt: ${result.data.receiptNumber}`);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error adding payment:', error);
+                alert('Failed to record payment');
+            }
+        }
+
+        // Update Payment Student Dropdowns
+        function updatePaymentStudentDropdowns() {
+            const select1 = document.getElementById('paymentStudentSelect');
+            const select2 = document.getElementById('filterPaymentStudent');
+            
+            const unpaidStudents = studentsData.filter(s => s.balance > 0);
+            
+            select1.innerHTML = '<option value="">Select student</option>' + 
+                unpaidStudents.map(s => 
+                    `<option value="${s.id}">${s.name} - Balance: ₹${s.balance}</option>`
+                ).join('');
+
+            select2.innerHTML = '<option value="">All Students</option>' + 
+                studentsData.map(s => 
+                    `<option value="${s.id}">${s.name}</option>`
+                ).join('');
+        }
+
+        // Update Balance Display
+        function updateBalanceDisplay() {
+            const studentId = document.getElementById('paymentStudentSelect').value;
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            
+            if (studentId) {
+                const student = studentsData.find(s => s.id === parseInt(studentId));
+                if (student) {
+                    document.getElementById('balanceAmount').textContent = `₹${student.balance.toLocaleString()}`;
+                    balanceDisplay.style.display = 'block';
+                }
+            } else {
+                balanceDisplay.style.display = 'none';
+            }
+        }
+
+        // Open Payment for Specific Student
+        function openPaymentForStudent(studentId) {
+            openAddPaymentModal();
+            document.getElementById('paymentStudentSelect').value = studentId;
+            updateBalanceDisplay();
+        }
+		
+		        // Load fee structures
+        async function loadFeeStructures() {
+            const academicYear = document.getElementById('filterAcademicYear').value;
+            const isActive = document.getElementById('filterStatus').value;
+
+            try {
+                let url = `${API_URL}/fee-structures?`;
+                if (academicYear) url += `academicYear=${academicYear}&`;
+                if (isActive) url += `isActive=${isActive}&`;
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    feeStructuresData = result.data;
+                    displayFeeStructures(feeStructuresData);
+                }
+            } catch (error) {
+                console.error('Error loading fee structures:', error);
+                showError('Failed to load fee structures');
+            }
+        }
+
+        // Display fee structures
+        function displayFeeStructures(data) {
+            const tbody = document.getElementById('feeStructuresTableBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <p>📋 No fee structures found</p>
+                            <p style="font-size: 0.9em; margin-top: 10px;">Click "+ Add Fee Structure" to create one</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.map(fee => {
+                const otherFees = parseFloat(fee.admission_fee || 0) + 
+                                parseFloat(fee.exam_fee || 0) + 
+                                parseFloat(fee.library_fee || 0) + 
+                                parseFloat(fee.sports_fee || 0) + 
+                                parseFloat(fee.lab_fee || 0) + 
+                                parseFloat(fee.transport_fee || 0) + 
+                                parseFloat(fee.other_fees || 0);
+
+                return `
+                    <tr>
+                        <td><strong>Class ${fee.class}</strong></td>
+                        <td>${fee.academic_year}</td>
+                        <td class="currency">₹${parseFloat(fee.tuition_fee).toLocaleString()}</td>
+                        <td class="currency">₹${otherFees.toLocaleString()}</td>
+                        <td class="currency"><strong>₹${parseFloat(fee.total_fee).toLocaleString()}</strong></td>
+                        <td>
+                            <span class="badge ${fee.is_active ? 'active' : 'inactive'}">
+                                ${fee.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-small" onclick="editFeeStructure(${fee.id})">
+                                Edit
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteFeeStructure(${fee.id})">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Calculate total fee
+        function calculateTotal() {
+            const tuition = parseFloat(document.getElementById('tuitionFee').value) || 0;
+            const admission = parseFloat(document.getElementById('admissionFee').value) || 0;
+            const exam = parseFloat(document.getElementById('examFee').value) || 0;
+            const library = parseFloat(document.getElementById('libraryFee').value) || 0;
+            const sports = parseFloat(document.getElementById('sportsFee').value) || 0;
+            const lab = parseFloat(document.getElementById('labFee').value) || 0;
+            const transport = parseFloat(document.getElementById('transportFee').value) || 0;
+            const other = parseFloat(document.getElementById('otherFees').value) || 0;
+
+            const total = tuition + admission + exam + library + sports + lab + transport + other;
+            document.getElementById('totalFeeDisplay').textContent = total.toLocaleString();
+        }
+
+        // Open add modal
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add Fee Structure';
+            document.getElementById('feeStructureForm').reset();
+            document.getElementById('feeStructureId').value = '';
+            calculateTotal();
+            document.getElementById('feeStructureModal').classList.add('active');
+        }
+
+        // Edit fee structure
+        async function editFeeStructure(id) {
+            const fee = feeStructuresData.find(f => f.id === id);
+            if (!fee) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Fee Structure';
+            document.getElementById('feeStructureId').value = fee.id;
+            document.getElementById('class').value = fee.class;
+            document.getElementById('academicYear').value = fee.academic_year;
+            document.getElementById('tuitionFee').value = fee.tuition_fee;
+            document.getElementById('admissionFee').value = fee.admission_fee || 0;
+            document.getElementById('examFee').value = fee.exam_fee || 0;
+            document.getElementById('libraryFee').value = fee.library_fee || 0;
+            document.getElementById('sportsFee').value = fee.sports_fee || 0;
+            document.getElementById('labFee').value = fee.lab_fee || 0;
+            document.getElementById('transportFee').value = fee.transport_fee || 0;
+            document.getElementById('otherFees').value = fee.other_fees || 0;
+            document.getElementById('isActive').value = fee.is_active ? 'true' : 'false';
+
+            calculateTotal();
+            document.getElementById('feeStructureModal').classList.add('active');
+        }
+
+        // Save fee structure
+        async function saveFeeStructure(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('feeStructureId').value;
+            const formData = {
+                class: document.getElementById('class').value,
+                academicYear: document.getElementById('academicYear').value,
+                tuitionFee: parseFloat(document.getElementById('tuitionFee').value),
+                admissionFee: parseFloat(document.getElementById('admissionFee').value) || 0,
+                examFee: parseFloat(document.getElementById('examFee').value) || 0,
+                libraryFee: parseFloat(document.getElementById('libraryFee').value) || 0,
+                sportsFee: parseFloat(document.getElementById('sportsFee').value) || 0,
+                labFee: parseFloat(document.getElementById('labFee').value) || 0,
+                transportFee: parseFloat(document.getElementById('transportFee').value) || 0,
+                otherFees: parseFloat(document.getElementById('otherFees').value) || 0,
+                isActive: document.getElementById('isActive').value === 'true'
+            };
+
+            try {
+                const url = id ? `${API_URL}/fee-structures/${id}` : `${API_URL}/fee-structures`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(id ? 'Fee structure updated successfully!' : 'Fee structure created successfully!');
+                    closeModal();
+                    loadFeeStructures();
+                } else {
+                    alert(result.message || 'Failed to save fee structure');
+                }
+            } catch (error) {
+                console.error('Error saving fee structure:', error);
+                alert('Failed to save fee structure');
+            }
+        }
+
+        // Delete fee structure
+        async function deleteFeeStructure(id) {
+            if (!confirm('Are you sure you want to delete this fee structure? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/fee-structures/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Fee structure deleted successfully!');
+                    loadFeeStructures();
+                } else {
+                    alert(result.message || 'Failed to delete fee structure');
+                }
+            } catch (error) {
+                console.error('Error deleting fee structure:', error);
+                alert('Failed to delete fee structure');
+            }
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // Modal Functions
+        function openAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('active');
+        }
+
+        function openAddPaymentModal() {
+            document.getElementById('addPaymentModal').classList.add('active');
+            document.getElementById('addPaymentForm').date.valueAsDate = new Date();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
